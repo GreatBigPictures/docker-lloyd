@@ -1,23 +1,22 @@
 #!/bin/sh -e
 
-TIMEOUT=86400 # 24 hours
 BACKUPS=/backups
+KEY_DIR=/mnt/keydir
 
-BUCKET=$1
-if [ -z "$BUCKET" ]
+DESTINATION=$1
+if [ -z "$DESTINATION" ]
 then
-  echo "$0 bucket container [container...]"
+  echo "$0 destination container [container...]"
   echo "(If set, docker-backup output will be POSTed to \$PUSHGATEWAY)"
   exit 1
 fi
 shift
 
-if [ -z "$ACCESS_KEY" -o -z "$SECRET_KEY" ]
+if [ -z "$USERNAME" -o -z "$PRIVATE_KEY" ]
 then
-  echo "Please set ACCESS_KEY and SECRET_KEY environment variables"
+  echo "Please set USERNAME and PRIVATE_KEY environment variables"
   exit 1
 fi
-
 
 [ -d "$BACKUPS" ] || mkdir "$BACKUPS"
 
@@ -35,13 +34,10 @@ backup() {
     gzip "$BACKUPS/$1.tar"
 
     echo "$1: Upload"
-    s3cmd --access_key="$ACCESS_KEY" --secret_key="$SECRET_KEY" \
-          -c /dev/null $S3CMD_OPTS put "$BACKUPS/$1.tar.gz" $BUCKET
+    scp -C -q -i "$KEY_DIR/$PRIVATE_KEY" "BACKUPS/$1.tar.gz" $USERNAME@$DESTINATION
     rm "$BACKUPS/$1.tar.gz"
 
     date +"last_run{container=\"$1\"} %s" | push_metrics
-    echo "$1: Sleep"
-    sleep $TIMEOUT
   done
 }
 

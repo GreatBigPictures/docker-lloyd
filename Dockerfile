@@ -1,10 +1,9 @@
 FROM fish/docker-backup
-MAINTAINER Johannes 'fish' Ziemke <fish@docker.com>
+MAINTAINER Michael Goodness <mgood@gbpinc.com>
 
-RUN apt-get update && apt-get -y -q install python-setuptools python-dateutil python-magic
-RUN git clone https://github.com/s3tools/s3cmd.git /s3cmd
-RUN cd /s3cmd && python setup.py install
+RUN apt-get update -q && DEBIAN_FRONTEND=noninteractive apt-get upgrade -q -y
 
-ADD run   /docker-backup/
-ADD s3cfg /.s3cfg
+ADD run /docker-backup/
+
+VOLUME /mnt/keydir
 ENTRYPOINT [ "./run" ]
