@@ -2,18 +2,19 @@
 *[Lloyd's Coffee House](http://en.wikipedia.org/wiki/Lloyd%27s_Coffee_House)
 was the first marine insurance company.*
 
-This tools backups Docker [volume containers](http://docs.docker.io/en/latest/use/working_with_volumes/#creating-and-mounting-a-data-volume-container)
-and stores them on s3.
+This tools backs-up Docker [volume containers](http://docs.docker.io/en/latest/use/working_with_volumes/#creating-and-mounting-a-data-volume-container)
+and stores them via scp.
 
 To use it, run:
 
     $ docker run -v /var/run/docker.sock:/docker.sock \
              -v /var/lib/docker/vfs/dir:/var/lib/docker/vfs/dir \
-             -e ACCESS_KEY=... -e SECRET_KEY=... docker-backup-daemon \
-              s3://<BUCKET> container-a container-b container-c...
+             --volumes-from SSH_VOLUME \
+             -e USERNAME=... -e PRIVATE_KEY=... docker-backup-daemon \
+              HOST:PATH container-a container-b container-c...
 
 This will run [docker-backup](https://github.com/discordianfish/docker-backup),
-gzip and upload a tarball named after the container to S3.
+gzip and upload a tarball named after the container to the destination.
 
 
 See [docker-backup](https://github.com/discordianfish/docker-backup) on

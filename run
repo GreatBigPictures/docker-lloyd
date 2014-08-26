@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 BACKUPS=/backups
-KEY_DIR=/mnt/keydir
+SSH_DIR=/root/.ssh
 
 DESTINATION=$1
 if [ -z "$DESTINATION" ]
@@ -20,6 +20,8 @@ fi
 
 [ -d "$BACKUPS" ] || mkdir "$BACKUPS"
 
+ssh -i "$SSH_DIR/$PRIVATE_KEY" "USERNAME"@"DESTINATION"
+
 push_metrics() {
   [ -z "$PUSHGATEWAY" ] && return
   curl --data-binary @- "$PUSHGATEWAY"
@@ -34,7 +36,7 @@ backup() {
     gzip "$BACKUPS/$1.tar"
 
     echo "$1: Upload"
-    scp -C -q -i "$KEY_DIR/$PRIVATE_KEY" "BACKUPS/$1.tar.gz" $USERNAME@$DESTINATION
+    scp -C -q -i "$SSH_DIR/$PRIVATE_KEY" "BACKUPS/$1.tar.gz" "$USERNAME"@"$DESTINATION"
     rm "$BACKUPS/$1.tar.gz"
 
     date +"last_run{container=\"$1\"} %s" | push_metrics
