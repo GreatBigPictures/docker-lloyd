@@ -10,8 +10,8 @@ To use it, run:
     $ docker run -v /var/run/docker.sock:/docker.sock \
              -v /var/lib/docker/vfs/dir:/var/lib/docker/vfs/dir \
              --volumes-from SSH_VOLUME \
-             -e USERNAME=... -e PRIVATE_KEY=... docker-backup-daemon \
-              HOST:PATH container-a container-b container-c...
+             -e REMOTE_DIR=... -e PRIVATE_KEY=... docker-backup-daemon \
+             user@backup-host container-a container-b container-c...
 
 This will run [docker-backup](https://github.com/discordianfish/docker-backup),
 gzip and upload a tarball named after the container to the destination.

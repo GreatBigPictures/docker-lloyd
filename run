@@ -3,24 +3,22 @@
 BACKUPS=/backups
 SSH_DIR=/root/.ssh
 
-DESTINATION=$1
-if [ -z "$DESTINATION" ]
+USERHOST=$1
+if [ -z "$USERHOST" ]
 then
-  echo "$0 destination container [container...]"
+  echo "$0 username@backup-host container [container...]"
   echo "(If set, docker-backup output will be POSTed to \$PUSHGATEWAY)"
   exit 1
 fi
 shift
 
-if [ -z "$USERNAME" -o -z "$PRIVATE_KEY" ]
+if [ -z "$REMOTE_DIR" -o -z "$PRIVATE_KEY" ]
 then
-  echo "Please set USERNAME and PRIVATE_KEY environment variables"
+  echo "Please set REMOTE_DIR and PRIVATE_KEY environment variables"
   exit 1
 fi
 
 [ -d "$BACKUPS" ] || mkdir "$BACKUPS"
-
-ssh -i "$SSH_DIR/$PRIVATE_KEY" "USERNAME"@"DESTINATION"
 
 push_metrics() {
   [ -z "$PUSHGATEWAY" ] && return
@@ -36,9 +34,10 @@ backup() {
     gzip "$BACKUPS/$1.tar"
 
     echo "$1: Upload"
-    scp -C -q -i "$SSH_DIR/$PRIVATE_KEY" "BACKUPS/$1.tar.gz" "$USERNAME"@"$DESTINATION"
+    cat "$BACKUPS/$1.tar.gz" | ssh -i "$SSH_DIR/$PRIVATE_KEY" "$USERHOST" "mkdir -p $REMOTE_DIR;cat > $REMOTE_DIR/$1.tar.gz"
+    
+    echo "$1: Cleanup"
     rm "$BACKUPS/$1.tar.gz"
-
     date +"last_run{container=\"$1\"} %s" | push_metrics
   done
 }
