@@ -27,19 +27,16 @@ push_metrics() {
 
 backup() {
   echo "[=] $1"
-  while true
-  do
-    echo "$1: Backup"
-    /docker-backup/docker-backup $OPTS -addr /docker.sock store "$BACKUPS/$1.tar" "$1" | push_metrics
-    gzip "$BACKUPS/$1.tar"
+  echo "$1: Backup"
+  /docker-backup/docker-backup $OPTS -addr /docker.sock store "$BACKUPS/$1.tar" "$1" | push_metrics
+  gzip "$BACKUPS/$1.tar"
 
-    echo "$1: Upload"
-    cat "$BACKUPS/$1.tar.gz" | ssh -i "$SSH_DIR/$PRIVATE_KEY" "$USERHOST" "mkdir -p $REMOTE_DIR;cat > $REMOTE_DIR/$1.tar.gz"
-    
-    echo "$1: Cleanup"
-    rm "$BACKUPS/$1.tar.gz"
-    date +"last_run{container=\"$1\"} %s" | push_metrics
-  done
+  echo "$1: Upload"
+  cat "$BACKUPS/$1.tar.gz" | ssh -i "$SSH_DIR/$PRIVATE_KEY" "$USERHOST" "mkdir -p $REMOTE_DIR;cat > $REMOTE_DIR/$1.tar.gz"
+  
+  echo "$1: Cleanup"
+  rm "$BACKUPS/$1.tar.gz"
+  date +"last_run{container=\"$1\"} %s" | push_metrics
 }
 
 for c in $@
