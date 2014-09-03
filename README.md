@@ -40,6 +40,7 @@ To restore a backup, run:
 
 Note: The volume container's image must be present on the host before restoring.
 
+
 The Dockerfile passes command line options to docker-backup by setting the OPTS
 environment variable. If you need to override/change those, you can set it on
 the command line:

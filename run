@@ -12,7 +12,7 @@ then
 fi
 shift
 
-if [ -z "$REMOTE_DIR" -o -z "$PRIVATE_KEY" -o -z "$USER_HOST"]
+if [ -z "$REMOTE_DIR" -o -z "$PRIVATE_KEY" -o -z "$USER_HOST" ]
 then
   echo "Please set REMOTE_DIR, PRIVATE_KEY, and USER_HOST environment variables"
   exit 1
