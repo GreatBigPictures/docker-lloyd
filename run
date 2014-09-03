@@ -3,18 +3,18 @@
 BACKUPS=/backups
 SSH_DIR=/root/.ssh
 
-USERHOST=$1
-if [ -z "$USERHOST" ]
+ACTION=$1
+if [ "$ACTION" != "store" ] && [ "$ACTION" != "restore" ]
 then
-  echo "$0 username@backup-host container [container...]"
+  echo "$0 store|restore container [container...]"
   echo "(If set, docker-backup output will be POSTed to \$PUSHGATEWAY)"
   exit 1
 fi
 shift
 
-if [ -z "$REMOTE_DIR" -o -z "$PRIVATE_KEY" ]
+if [ -z "$REMOTE_DIR" -o -z "$PRIVATE_KEY" -o -z "$USER_HOST"]
 then
-  echo "Please set REMOTE_DIR and PRIVATE_KEY environment variables"
+  echo "Please set REMOTE_DIR, PRIVATE_KEY, and USER_HOST environment variables"
   exit 1
 fi
 
@@ -25,23 +25,37 @@ push_metrics() {
   curl --data-binary @- "$PUSHGATEWAY"
 }
 
-backup() {
+store() {
   echo "[=] $1"
   echo "$1: Backup"
   /docker-backup/docker-backup $OPTS -addr /docker.sock store "$BACKUPS/$1.tar" "$1" | push_metrics
   gzip "$BACKUPS/$1.tar"
 
   echo "$1: Upload"
-  cat "$BACKUPS/$1.tar.gz" | ssh -i "$SSH_DIR/$PRIVATE_KEY" "$USERHOST" "mkdir -p $REMOTE_DIR;cat > $REMOTE_DIR/$1.tar.gz"
+  cat "$BACKUPS/$1.tar.gz" | ssh -i "$SSH_DIR/$PRIVATE_KEY" "$USER_HOST" "mkdir -p $REMOTE_DIR;cat > $REMOTE_DIR/$1.tar.gz"
   
   echo "$1: Cleanup"
   rm "$BACKUPS/$1.tar.gz"
   date +"last_run{container=\"$1\"} %s" | push_metrics
 }
 
+restore() {
+  echo "[=] $1"
+  echo "$1: Download"
+  scp -i "$SSH_DIR/$PRIVATE_KEY" "$USER_HOST:$REMOTE_DIR/$1.tar.gz" "$BACKUPS"
+  
+  echo "$1: Restore"
+  gunzip "$BACKUPS/$1.tar.gz"
+  /docker-backup/docker-backup $OPTS -addr /docker.sock restore "$BACKUPS/$1.tar" | push_metrics
+  
+  echo "$1: Cleanup"
+  rm "$BACKUPS/$1.tar"
+  date +"last_run{container=\"$1\"} %s" | push_metrics
+}
+
 for c in $@
 do
-  backup $c &
+  $ACTION $c &
 done
 
 wait
