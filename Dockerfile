@@ -1,5 +1,5 @@
 FROM fish/docker-backup
-MAINTAINER Michael Goodness <mgood@gbpinc.com>
+MAINTAINER Michael Goodness <mgoodness@gmail.com>
 
 RUN apt-get update -q && DEBIAN_FRONTEND=noninteractive apt-get upgrade -q -y
 

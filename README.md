@@ -11,7 +11,7 @@ To use it, first generate an SSH keypair in a volume container:
 
 	$ docker run -it -v /root/.ssh --volumes-from backups_ssh \
 		--entrypoint /bin/bash \
-		--name lloyd_setup greatbigpictures/docker-lloyd:latest
+		--name lloyd_setup mgoodness/docker-lloyd:latest
 
 	$ ssh-keygen -b4096 -C <key_name> -f /root/.ssh/<key_file>
 	$ ssh-copy-id -i /root/.ssh/<key_file> <user@backup-host>
@@ -22,7 +22,7 @@ then run:
              -v /var/lib/docker/vfs/dir:/var/lib/docker/vfs/dir \
              --volumes-from backups_ssh \
              -e REMOTE_DIR=... -e PRIVATE_KEY=<key_file> -e USER_HOST=<user@host> \
-             greatbigpictures/docker-lloyd:latest store \
+             mgoodness/docker-lloyd:latest store \
              container-a container-b container-c...
 
 This will run [docker-backup](https://github.com/discordianfish/docker-backup),
@@ -35,7 +35,7 @@ To restore a backup, run:
              -v /var/lib/docker/vfs/dir:/var/lib/docker/vfs/dir \
              --volumes-from backups_ssh \
              -e REMOTE_DIR=... -e PRIVATE_KEY=<key_file> -e USER_HOST=<user@host> \
-             greatbigpictures/docker-lloyd:latest restore \
+             mgoodness/docker-lloyd:latest restore \
              container-a container-b container-c...
 
 Note: The volume container's image must be present on the host before restoring.
