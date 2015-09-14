@@ -2,19 +2,19 @@
 *[Lloyd's Coffee House](http://en.wikipedia.org/wiki/Lloyd%27s_Coffee_House)
 was the first marine insurance company.*
 
-This tool backs-up and restores Docker [volume containers](http://docs.docker.io/en/latest/use/working_with_volumes/#creating-and-mounting-a-data-volume-container)
+This tool backs up and restores Docker [volume containers](http://docs.docker.io/en/latest/use/working_with_volumes/#creating-and-mounting-a-data-volume-container)
 and stores them via SSH.
 
 To use it, first generate an SSH keypair in a volume container:
 
-	$ docker run -v /root/.ssh --name backups_ssh busybox:latest true
+  $ docker run -v /root/.ssh --name backups_ssh busybox:latest true
 
-	$ docker run -it -v /root/.ssh --volumes-from backups_ssh \
-		--entrypoint /bin/bash \
-		--name lloyd_setup mgoodness/docker-lloyd:latest
+  $ docker run -it -v /root/.ssh --volumes-from backups_ssh \
+    --entrypoint /bin/bash \
+    --name lloyd_setup mgoodness/docker-lloyd:latest
 
-	$ ssh-keygen -b4096 -C <key_name> -f /root/.ssh/<key_file>
-	$ ssh-copy-id -i /root/.ssh/<key_file> <user@backup-host>
+  $ ssh-keygen -b4096 -C <key_name> -f /root/.ssh/<key_file>
+  $ ssh-copy-id -i /root/.ssh/<key_file> <user@backup-host>
 
 then run:
 
